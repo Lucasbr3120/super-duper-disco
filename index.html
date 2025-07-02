@@ -9,6 +9,16 @@
 </head>
 
 <body>
+  <div id="telaLogin" style="display:block;">
+  <div class="login-card">
+    <h2>Login Komilão</h2>
+    <input id="loginUsuario" placeholder="E-mail" type="email" />
+    <input id="loginSenha" placeholder="Senha" type="password" />
+    <button onclick="fazerLoginFirebase()">Entrar</button>
+    <button onclick="fazerCadastroUsuario()">Criar Conta</button>
+    <p id="erroLogin" style="color:red;display:none;"></p>
+  </div>
+  </div>
   <header class="header">
     <div class="container">
       <h1>Sistema de Caixa - Komilão</h1>
