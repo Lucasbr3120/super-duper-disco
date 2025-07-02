@@ -1,27 +1,26 @@
-// Referências globais
+// Komilão - Script Completo com Firebase Authentication + Firestore
+// Requer scripts Firebase compat no HTML e const auth/db globais
+
+// Variáveis globais dos dados
 let produtos = [];
 let vendas = [];
 let vendasHoje = [];
 let caixaAberto = false;
 let dadosCaixa = {};
 
-// LOGIN
+// --- LOGIN E CADASTRO ---
 function fazerLoginFirebase() {
   const email = document.getElementById('loginUsuario').value;
   const senha = document.getElementById('loginSenha').value;
   auth.signInWithEmailAndPassword(email, senha)
     .then(() => {
-      document.getElementById('telaLogin').style.display = 'none';
-      document.querySelector('header').style.display = '';
-      document.querySelector('main').style.display = '';
-      carregarDadosUsuario();
+      document.getElementById('erroLogin').style.display = 'none';
     })
     .catch(e => {
       document.getElementById('erroLogin').style.display = 'block';
       document.getElementById('erroLogin').innerText = 'Login inválido: ' + e.message;
     });
 }
-
 function fazerCadastroUsuario() {
   const email = document.getElementById('loginUsuario').value;
   const senha = document.getElementById('loginSenha').value;
@@ -36,21 +35,15 @@ function fazerCadastroUsuario() {
     });
 }
 
-// Atualiza interface ao logar/deslogar
-auth.onAuthStateChanged(user => {
-  if (user) {
-    document.getElementById('telaLogin').style.display = 'none';
-    document.querySelector('header').style.display = '';
-    document.querySelector('main').style.display = '';
-    carregarDadosUsuario();
-  } else {
-    document.getElementById('telaLogin').style.display = 'block';
-    document.querySelector('header').style.display = 'none';
-    document.querySelector('main').style.display = 'none';
-  }
-});
+// --- TROCA DE PÁGINAS ---
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(sec => sec.classList.remove('active'));
+  document.getElementById(page).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+  [...document.querySelectorAll('.nav-btn')].find(btn => btn.textContent.toLowerCase().includes(page)).classList.add('active');
+}
 
-// SALVAR DADOS NO FIRESTORE
+// --- FIRESTORE: SALVAR/CARREGAR ---
 function salvarDadosUsuarioFirestore() {
   const user = auth.currentUser;
   if (!user) return;
@@ -62,8 +55,6 @@ function salvarDadosUsuarioFirestore() {
     dadosCaixa
   }, { merge: true });
 }
-
-// CARREGAR DADOS DO FIRESTORE AO LOGIN
 function carregarDadosUsuario() {
   const user = auth.currentUser;
   if (!user) return;
@@ -82,23 +73,42 @@ function carregarDadosUsuario() {
       caixaAberto = false;
       dadosCaixa = {};
     }
-    atualizarListaProdutos();
     atualizarDashboard();
+    atualizarListaProdutos();
     atualizarEstoque();
+    // Adicione outras funções de atualização se necessário
   });
 }
 
-// CADASTRAR PRODUTO
+// --- AUTENTICAÇÃO: CONTROLE DE EXIBIÇÃO ---
+auth.onAuthStateChanged(user => {
+  if (user) {
+    document.getElementById('telaLogin').style.display = 'none';
+    document.querySelector('header').style.display = '';
+    document.querySelector('main').style.display = '';
+    carregarDadosUsuario();
+  } else {
+    document.getElementById('telaLogin').style.display = 'block';
+    document.querySelector('header').style.display = 'none';
+    document.querySelector('main').style.display = 'none';
+  }
+});
+
+// --- PRODUTOS: CADASTRAR/EXCLUIR/LISTAR ---
 document.getElementById('formProduto').addEventListener('submit', cadastrarProduto);
 
 function cadastrarProduto(e) {
   e.preventDefault();
-  const codigo = document.getElementById('codigoProduto').value;
-  const nome = document.getElementById('nomeProduto').value;
+  const codigo = document.getElementById('codigoProduto').value.trim();
+  const nome = document.getElementById('nomeProduto').value.trim();
   const preco = parseFloat(document.getElementById('precoProduto').value);
   const quantidade = parseInt(document.getElementById('quantidadeProduto').value);
   const categoria = document.getElementById('categoriaProduto').value;
 
+  if (!codigo || !nome || isNaN(preco) || isNaN(quantidade) || !categoria) {
+    alert('Preencha todos os campos corretamente.');
+    return;
+  }
   if (produtos.find(p => p.codigo === codigo)) {
     alert('Código já existe! Use um código diferente.');
     return;
@@ -122,7 +132,6 @@ function cadastrarProduto(e) {
   alert('Produto cadastrado com sucesso!');
 }
 
-// LISTAR PRODUTOS NA TABELA
 function atualizarListaProdutos() {
   const tbody = document.getElementById('tabelaProdutos');
   if (!tbody) return;
@@ -143,7 +152,6 @@ function atualizarListaProdutos() {
   });
 }
 
-// EXCLUIR PRODUTO
 function excluirProduto(id) {
   if (confirm('Tem certeza que deseja excluir este produto?')) {
     produtos = produtos.filter(p => p.id !== id);
@@ -153,15 +161,82 @@ function excluirProduto(id) {
   }
 }
 
-// EXEMPLO DE FUNÇÕES DE ATUALIZAÇÃO DE DASHBOARD E ESTOQUE
+// --- DASHBOARD: ATUALIZAÇÃO ---
 function atualizarDashboard() {
-  document.getElementById('totalProdutos').textContent = produtos.length;
-  // Implemente os outros indicadores conforme seu sistema
+  const vendasHojeSpan = document.getElementById('vendasHoje');
+  const totalProdutosSpan = document.getElementById('totalProdutos');
+  const estoqueBaixoSpan = document.getElementById('estoqueBaixo');
+  const vendasMesSpan = document.getElementById('vendasMes');
+  const ultimasVendasDiv = document.getElementById('ultimasVendas');
+  if (totalProdutosSpan) totalProdutosSpan.textContent = produtos.length;
+  if (estoqueBaixoSpan) estoqueBaixoSpan.textContent = produtos.filter(p=>p.quantidade<=5).length;
+  if (vendasHojeSpan) vendasHojeSpan.textContent = "R$ " + (vendasHoje.reduce((s, v) => s + v.total, 0)).toFixed(2);
+  if (vendasMesSpan) vendasMesSpan.textContent = "R$ " + (vendas.filter(v => (new Date(v.data)).getMonth() === (new Date()).getMonth()).reduce((s, v) => s + v.total, 0)).toFixed(2);
+  if (ultimasVendasDiv) {
+    ultimasVendasDiv.innerHTML = '';
+    (vendas.slice(-5).reverse()).forEach(v => {
+      const p = document.createElement('p');
+      p.textContent = `${new Date(v.data).toLocaleDateString()} - R$ ${v.total.toFixed(2)}`;
+      ultimasVendasDiv.appendChild(p);
+    });
+    if (ultimasVendasDiv.children.length === 0) ultimasVendasDiv.innerHTML = '<p>Nenhuma venda registrada</p>';
+  }
 }
+
+// --- ESTOQUE: ATUALIZAÇÃO ---
 function atualizarEstoque() {
-  // Atualize o estoque conforme sua lógica
+  const tbody = document.getElementById('tabelaEstoque');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  produtos.forEach(produto => {
+    const tr = document.createElement('tr');
+    const status = produto.quantidade <= 5 ? '<span style="color:red">Baixo</span>' : 'OK';
+    tr.innerHTML = `
+      <td>${produto.codigo}</td>
+      <td>${produto.nome}</td>
+      <td>${produto.quantidade}</td>
+      <td>${status}</td>
+      <td>
+        <!-- Adapte para repor/excluir se quiser -->
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
 
-// Troque todas as funções que alteram dados (venda, estoque, caixa, etc) para chamar salvarDadosUsuarioFirestore()!
+// --- PESQUISA DE PRODUTOS ---
+document.getElementById('searchProdutos')?.addEventListener('input', function() {
+  const termo = this.value.toLowerCase();
+  const tbody = document.getElementById('tabelaProdutos');
+  tbody.innerHTML = '';
+  produtos.filter(p => 
+    p.codigo.toLowerCase().includes(termo) ||
+    p.nome.toLowerCase().includes(termo)
+  ).forEach(produto => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${produto.codigo}</td>
+      <td>${produto.nome}</td>
+      <td>R$ ${produto.preco.toFixed(2)}</td>
+      <td>${produto.quantidade}</td>
+      <td>${produto.categoria}</td>
+      <td>
+        <button class="btn-danger" onclick="excluirProduto(${produto.id})">Excluir</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+});
 
-// Nunca mais use localStorage!
+// --- ESTRUTURA PARA VENDAS, RELATÓRIOS ETC ---
+// Implemente as funções de venda, fechamento de caixa, relatórios etc 
+// SEMPRE atualizando o array correspondente (vendas, caixa, etc) 
+// e chamando salvarDadosUsuarioFirestore() após qualquer alteração
+
+// --- TROCA DE PÁGINAS PELOS BOTÕES ---
+window.showPage = showPage;
+window.fazerLoginFirebase = fazerLoginFirebase;
+window.fazerCadastroUsuario = fazerCadastroUsuario;
+window.excluirProduto = excluirProduto;
+
+// Adapte e expanda conforme seu sistema!
