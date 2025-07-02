@@ -143,8 +143,30 @@
         <div class="venda-container">
           <div class="venda-form">
             <h3>Nova Venda</h3>
+            
+            <!-- Seleção por Categoria -->
+            <div class="categoria-selector">
+              <h4>Selecionar por Categoria</h4>
+              <div class="categorias-grid">
+                <button class="categoria-btn" onclick="mostrarProdutosPorCategoria('alimenticios')">Alimentícios</button>
+                <button class="categoria-btn" onclick="mostrarProdutosPorCategoria('bebidas')">Bebidas</button>
+                <button class="categoria-btn" onclick="mostrarProdutosPorCategoria('higiene')">Higiene</button>
+                <button class="categoria-btn" onclick="mostrarProdutosPorCategoria('limpeza')">Limpeza</button>
+                <button class="categoria-btn" onclick="mostrarProdutosPorCategoria('outros')">Outros</button>
+                <button class="categoria-btn" onclick="mostrarTodosProdutos()">Todos</button>
+              </div>
+            </div>
+            
+            <!-- Lista de Produtos para Seleção -->
+            <div id="produtosVenda" class="produtos-venda" style="display: none;">
+              <h4>Produtos Disponíveis</h4>
+              <div id="listaProdutosVenda" class="produtos-grid">
+              </div>
+            </div>
+            
+            <!-- Busca Manual -->
             <div class="form-group">
-              <label for="codigoVenda">Código do Produto:</label>
+              <label for="codigoVenda">Ou digite código/nome do produto:</label>
               <input type="text" id="codigoVenda" placeholder="Digite o código ou nome">
               <button onclick="adicionarItem()">Adicionar</button>
             </div>
