@@ -75,66 +75,66 @@
       </section>
 
       <!-- Produtos -->
-      <section id="produtos" class="page">
-        <h2>Gerenciar Produtos</h2>
-        
-        <div class="form-container">
-          <h3>Cadastrar Produto</h3>
-          <form id="formProduto" class="form">
-            <div class="form-group">
-              <label for="codigoProduto">Código:</label>
-              <input type="text" id="codigoProduto" required>
-            </div>
-            <div class="form-group">
-              <label for="nomeProduto">Nome:</label>
-              <input type="text" id="nomeProduto" required>
-            </div>
-            <div class="form-group">
-              <label for="precoProduto">Preço:</label>
-              <input type="number" step="0.01" id="precoProduto" required>
-            </div>
-            <div class="form-group">
-              <label for="quantidadeProduto">Quantidade:</label>
-              <input type="number" id="quantidadeProduto" required>
-            </div>
-            <div class="form-group">
-              <label for="categoriaProduto">Categoria:</label>
-              <select id="categoriaProduto" required>
-                <option value="">Selecione...</option>
-                <option value="alimenticios">Alimentícios</option>
-                <option value="bebidas">Bebidas</option>
-                <option value="higiene">Higiene</option>
-                <option value="limpeza">Limpeza</option>
-                <option value="outros">Outros</option>
-              </select>
-            </div>
-            <button type="submit">Cadastrar Produto</button>
-          </form>
-        </div>
-
-        <div class="produtos-lista">
-          <h3>Lista de Produtos</h3>
-          <div class="search-box">
-            <input type="text" id="searchProdutos" placeholder="Buscar produtos...">
-          </div>
-          <div id="listaProdutos" class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Nome</th>
-                  <th>Preço</th>
-                  <th>Quantidade</th>
-                  <th>Categoria</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody id="tabelaProdutos">
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
+      <section id="relatorios" class="page">
+  <h2>Relatórios</h2>
+  
+  <div class="relatorio-filters">
+    <h3>Filtros</h3>
+    <div class="form-group">
+      <label for="dataInicio">Data Início:</label>
+      <input type="date" id="dataInicio">
+    </div>
+    <div class="form-group">
+      <label for="dataFim">Data Fim:</label>
+      <input type="date" id="dataFim">
+    </div>
+    <button onclick="gerarRelatorio()">Gerar Relatório</button>
+    <button onclick="exportarPDF()" class="btn-secondary">Exportar PDF</button>
+  </div>
+  
+  <div class="relatorio-resultado">
+    <h3>Resumo de Vendas</h3>
+    <div id="resumoVendas" class="relatorio-stats">
+      <div class="stat-item">
+        <span>Total de Vendas:</span>
+        <span id="relatorioTotal">R$ 0,00</span>
+      </div>
+      <div class="stat-item">
+        <span>Número de Vendas:</span>
+        <span id="relatorioQuantidade">0</span>
+      </div>
+      <div class="stat-item">
+        <span>Ticket Médio:</span>
+        <span id="relatorioTicketMedio">R$ 0,00</span>
+      </div>
+    </div>
+    
+    <div class="vendas-detalhes">
+      <h4>Detalhes das Vendas</h4>
+      <div id="vendasDetalhes" class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Hora</th>
+              <th>Cliente</th>
+              <th>Produtos</th>
+              <th>Itens</th>
+              <th>Forma de Pagamento</th>
+              <th>Total</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="corpoRelatorioVendas">
+            <tr>
+              <td colspan="8"><p>Selecione um período para visualizar as vendas</p></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
 
       <!-- Vendas -->
       <section id="vendas" class="page">
