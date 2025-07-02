@@ -147,20 +147,55 @@ function excluirProduto(id) {
 }
 
 // Funções de Vendas
-function adicionarItem() {
-    const codigo = document.getElementById('codigoVenda').value.trim();
-    if (!codigo) return;
+function mostrarProdutosPorCategoria(categoria) {
+    // Resetar botões ativos
+    document.querySelectorAll('.categoria-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
     
-    const produto = produtos.find(p => 
-        p.codigo.toLowerCase() === codigo.toLowerCase() || 
-        p.nome.toLowerCase().includes(codigo.toLowerCase())
-    );
+    const produtosFiltrados = produtos.filter(p => p.categoria === categoria);
+    mostrarListaProdutos(produtosFiltrados);
+}
+
+function mostrarTodosProdutos() {
+    // Resetar botões ativos
+    document.querySelectorAll('.categoria-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
     
-    if (!produto) {
-        alert('Produto não encontrado!');
+    mostrarListaProdutos(produtos);
+}
+
+function mostrarListaProdutos(listaProdutos) {
+    const container = document.getElementById('produtosVenda');
+    const lista = document.getElementById('listaProdutosVenda');
+    
+    container.style.display = 'block';
+    lista.innerHTML = '';
+    
+    if (listaProdutos.length === 0) {
+        lista.innerHTML = '<p>Nenhum produto encontrado nesta categoria.</p>';
         return;
     }
     
+    listaProdutos.forEach(produto => {
+        const div = document.createElement('div');
+        div.className = `produto-item ${produto.quantidade <= 0 ? 'sem-estoque' : ''}`;
+        
+        if (produto.quantidade > 0) {
+            div.onclick = () => adicionarProdutoAoCarrinho(produto);
+        }
+        
+        div.innerHTML = `
+            <div class="produto-nome">${produto.nome}</div>
+            <div class="produto-codigo">Código: ${produto.codigo}</div>
+            <div class="produto-preco">R$ ${produto.preco.toFixed(2)}</div>
+            <div class="produto-estoque">${produto.quantidade > 0 ? `Estoque: ${produto.quantidade}` : 'Sem estoque'}</div>
+        `;
+        
+        lista.appendChild(div);
+    });
+}
+
+function adicionarProdutoAoCarrinho(produto) {
     if (produto.quantidade <= 0) {
         alert('Produto sem estoque!');
         return;
@@ -187,6 +222,36 @@ function adicionarItem() {
     }
     
     atualizarCarrinho();
+    
+    // Atualizar a lista visual (diminuir estoque temporariamente)
+    const produtoDiv = event.target.closest('.produto-item');
+    const estoqueSpan = produtoDiv.querySelector('.produto-estoque');
+    const estoqueAtual = produto.quantidade - (itemExistente ? itemExistente.quantidade : 1);
+    
+    if (estoqueAtual <= 0) {
+        produtoDiv.classList.add('sem-estoque');
+        produtoDiv.onclick = null;
+        estoqueSpan.textContent = 'Sem estoque';
+    } else {
+        estoqueSpan.textContent = `Estoque: ${estoqueAtual}`;
+    }
+}
+
+function adicionarItem() {
+    const codigo = document.getElementById('codigoVenda').value.trim();
+    if (!codigo) return;
+    
+    const produto = produtos.find(p => 
+        p.codigo.toLowerCase() === codigo.toLowerCase() || 
+        p.nome.toLowerCase().includes(codigo.toLowerCase())
+    );
+    
+    if (!produto) {
+        alert('Produto não encontrado!');
+        return;
+    }
+    
+    adicionarProdutoAoCarrinho(produto);
     document.getElementById('codigoVenda').value = '';
 }
 
@@ -515,9 +580,8 @@ function gerarRelatorio() {
         return;
     }
     
-    const inicio = new Date(dataInicio);
-    const fim = new Date(dataFim);
-    fim.setHours(23, 59, 59); // Incluir o dia todo
+    const inicio = new Date(dataInicio + 'T00:00:00');
+    const fim = new Date(dataFim + 'T23:59:59');
     
     const vendasFiltradas = vendas.filter(venda => {
         const dataVenda = new Date(venda.data);
@@ -591,7 +655,14 @@ function atualizarDashboard() {
     // Vendas do mês
     const hoje = new Date();
     const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-    const vendasMes = vendas.filter(venda => new Date(venda.data) >= inicioMes);
+    inicioMes.setHours(0, 0, 0, 0);
+    const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+    fimMes.setHours(23, 59, 59, 999);
+    
+    const vendasMes = vendas.filter(venda => {
+        const dataVenda = new Date(venda.data);
+        return dataVenda >= inicioMes && dataVenda <= fimMes;
+    });
     const totalMes = vendasMes.reduce((sum, venda) => sum + venda.total, 0);
     document.getElementById('vendasMes').textContent = `R$ ${totalMes.toFixed(2)}`;
     
@@ -827,9 +898,8 @@ function exportarPDF() {
         return;
     }
     
-    const inicio = new Date(dataInicio);
-    const fim = new Date(dataFim);
-    fim.setHours(23, 59, 59);
+    const inicio = new Date(dataInicio + 'T00:00:00');
+    const fim = new Date(dataFim + 'T23:59:59');
     
     const vendasFiltradas = vendas.filter(venda => {
         const dataVenda = new Date(venda.data);
