@@ -1,453 +1,122 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-
+<html lang="pt-br">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
+  <title>Komilão - Sistema de Vendas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Caixa - Komilão</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
-  <!-- Adicione os scripts do Firebase antes do script.js -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script>
-    // Seu firebaseConfig
+    // Substitua pelos seus dados do Firebase
     const firebaseConfig = {
-      apiKey: "AIzaSyDwqJO7H4TSqeyPfZdlBRhqHPK6LuiKbxs",
-      authDomain: "comilao-67a50.firebaseapp.com",
-      projectId: "comilao-67a50",
-      storageBucket: "comilao-67a50.appspot.com",
-      messagingSenderId: "533101126404",
-      appId: "1:533101126404:web:b3a48a8d8cd2236b9b2651",
-      measurementId: "G-4CBJ0EJX7B"
+      apiKey: "SUA_API_KEY",
+      authDomain: "SEU_AUTH_DOMAIN",
+      projectId: "SEU_PROJECT_ID",
+      // ...outros campos se necessários...
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
   </script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f8f8f8; }
+    header { background: #4CAF50; color: #fff; padding: 10px 0; text-align: center; }
+    nav { display: flex; justify-content: center; gap: 10px; }
+    .nav-btn { background: #388e3c; color: #fff; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
+    .nav-btn.active { background: #fff; color: #388e3c; font-weight: bold; border: 1px solid #388e3c; }
+    main { max-width: 900px; margin: 20px auto; background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px #0001; }
+    .page { display: none; }
+    .page.active { display: block; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #fff; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #4CAF50; color: #fff; }
+    .btn-danger { background: #e53935; color: #fff; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
+    /* Login styles */
+    #telaLogin { max-width: 350px; margin: 60px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0002; padding: 30px; text-align: center;}
+    #telaLogin input { margin: 10px 0; width: 90%; padding: 10px;}
+    #telaLogin button { width: 40%; margin: 10px 5%; padding: 10px;}
+    #erroLogin { color: red; margin: 10px 0;}
+    /* Form styles */
+    form input, form select, form button { margin: 5px 5px 5px 0; padding: 7px;}
+    form button { padding: 8px 16px; }
+    /* Misc */
+    @media (max-width: 700px) {
+      main { padding: 10px; }
+      table th, table td { font-size: 14px; }
+    }
+  </style>
+  <script src="script.js" defer></script>
 </head>
-
 <body>
-  <div id="telaLogin" style="display:block;">
-    <div class="login-card">
-      <h2>Login Komilão</h2>
-      <input id="loginUsuario" placeholder="E-mail" type="email" />
-      <input id="loginSenha" placeholder="Senha" type="password" />
-      <button onclick="fazerLoginFirebase()">Entrar</button>
-      <button onclick="fazerCadastroUsuario()">Criar Conta</button>
-      <p id="erroLogin" style="color:red;display:none;"></p>
-    </div>
+  <!-- Tela de Login -->
+  <div id="telaLogin">
+    <h2>Login Komilão</h2>
+    <input id="loginUsuario" placeholder="Email" type="email" autocomplete="username" required>
+    <input id="loginSenha" placeholder="Senha" type="password" autocomplete="current-password" required>
+    <br>
+    <button onclick="fazerLoginFirebase()">Entrar</button>
+    <button onclick="fazerCadastroUsuario()">Cadastrar</button>
+    <div id="erroLogin" style="display:none"></div>
   </div>
-  <header class="header">
-    <div class="container">
-      <h1>Sistema de Caixa - Komilão</h1>
-      <nav class="nav">
-        <button class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
-        <button class="nav-btn" onclick="showPage('produtos')">Produtos</button>
-        <button class="nav-btn" onclick="showPage('vendas')">Vendas</button>
-        <button class="nav-btn" onclick="showPage('estoque')">Estoque</button>
-        <button class="nav-btn" onclick="showPage('relatorios')">Relatórios</button>
-      </nav>
-    </div>
+
+  <header style="display:none;">
+    <nav>
+      <button class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
+      <button class="nav-btn" onclick="showPage('produtos')">Produtos</button>
+      <button class="nav-btn" onclick="showPage('estoque')">Estoque</button>
+      <!-- Adicione outros menus conforme desejar -->
+    </nav>
   </header>
 
-  <main class="main">
-    <div class="container">
-      <h1>Sistema de Caixa - Komilão</h1>
-      <nav class="nav">
-        <button class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
-        <button class="nav-btn" onclick="showPage('produtos')">Produtos</button>
-        <button class="nav-btn" onclick="showPage('vendas')">Vendas</button>
-        <button class="nav-btn" onclick="showPage('estoque')">Estoque</button>
-        <button class="nav-btn" onclick="showPage('relatorios')">Relatórios</button>
-      </nav>
-    </div>
-  </header>
+  <main style="display:none;">
+    <!-- Dashboard -->
+    <section id="dashboard" class="page active">
+      <h2>Dashboard</h2>
+      <div>Total Produtos: <span id="totalProdutos">0</span></div>
+      <div>Vendas Hoje: <span id="vendasHoje">R$ 0,00</span></div>
+      <div>Estoque Baixo: <span id="estoqueBaixo">0</span></div>
+      <div>Vendas do Mês: <span id="vendasMes">R$ 0,00</span></div>
+      <h3>Últimas Vendas</h3>
+      <div id="ultimasVendas"></div>
+    </section>
 
-  <main class="main">
-    <div class="container">
-      <!-- Dashboard -->
-      <section id="dashboard" class="page active">
-        <h2>Dashboard</h2>
-        
-        <!-- Status do Caixa -->
-        <div class="caixa-status">
-          <div class="status-card">
-            <h3>Status do Caixa</h3>
-            <div id="statusCaixa" class="status-info">
-              <span class="status-badge status-fechado">Fechado</span>
-            </div>
-            <div class="caixa-actions">
-              <button id="btnAbrirCaixa" onclick="abrirCaixa()" class="btn-primary">Abrir Caixa</button>
-              <button id="btnFecharCaixa" onclick="fecharCaixa()" class="btn-danger" style="display: none;">Fechar Caixa</button>
-            </div>
-            <div id="infoCaixa" class="caixa-info" style="display: none;">
-              <p>Valor inicial: R$ <span id="valorInicial">0,00</span></p>
-              <p>Abertura: <span id="horarioAbertura">-</span></p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="stats-grid">
-          <div class="stat-card">
-            <h3>Vendas Hoje</h3>
-            <span class="stat-value" id="vendasHoje">R$ 0,00</span>
-          </div>
-          <div class="stat-card">
-            <h3>Produtos</h3>
-            <span class="stat-value" id="totalProdutos">0</span>
-          </div>
-          <div class="stat-card">
-            <h3>Estoque Baixo</h3>
-            <span class="stat-value" id="estoqueBaixo">0</span>
-          </div>
-          <div class="stat-card">
-            <h3>Vendas do Mês</h3>
-            <span class="stat-value" id="vendasMes">R$ 0,00</span>
-          </div>
-        </div>
-        
-        <div class="recent-sales">
-          <h3>Últimas Vendas</h3>
-          <div id="ultimasVendas" class="sales-list">
-            <p>Nenhuma venda registrada</p>
-          </div>
-        </div>
-      </section>
+    <!-- Produtos -->
+    <section id="produtos" class="page">
+      <h2>Cadastro de Produtos</h2>
+      <form id="formProduto" autocomplete="off">
+        <input id="codigoProduto" placeholder="Código" required>
+        <input id="nomeProduto" placeholder="Nome" required>
+        <input id="precoProduto" placeholder="Preço" type="number" step="0.01" min="0" required>
+        <input id="quantidadeProduto" placeholder="Qtd." type="number" min="0" required>
+        <input id="categoriaProduto" placeholder="Categoria" required>
+        <button type="submit">Cadastrar</button>
+      </form>
+      <input id="searchProdutos" placeholder="Buscar produto..." style="margin:10px 0; width:100%; padding:8px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th><th>Nome</th><th>Preço</th><th>Qtd</th><th>Categoria</th><th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaProdutos"></tbody>
+      </table>
+    </section>
 
-      <!-- Produtos -->
-      <section id="produtos" class="page">
-        <h2>Gerenciar Produtos</h2>
-        
-        <div class="form-container">
-          <h3>Cadastrar Produto</h3>
-          <form id="formProduto" class="form">
-            <div class="form-group">
-              <label for="codigoProduto">Código:</label>
-              <input type="text" id="codigoProduto" required>
-            </div>
-            <div class="form-group">
-              <label for="nomeProduto">Nome:</label>
-              <input type="text" id="nomeProduto" required>
-            </div>
-            <div class="form-group">
-              <label for="precoProduto">Preço:</label>
-              <input type="number" step="0.01" id="precoProduto" required>
-            </div>
-            <div class="form-group">
-              <label for="quantidadeProduto">Quantidade:</label>
-              <input type="number" id="quantidadeProduto" required>
-            </div>
-            <div class="form-group">
-              <label for="categoriaProduto">Categoria:</label>
-              <select id="categoriaProduto" required>
-                <option value="">Selecione...</option>
-                <option value="alimenticios">Alimentícios</option>
-                <option value="bebidas">Bebidas</option>
-                <option value="higiene">Higiene</option>
-                <option value="limpeza">Limpeza</option>
-                <option value="outros">Outros</option>
-              </select>
-            </div>
-            <button type="submit">Cadastrar Produto</button>
-          </form>
-        </div>
-
-        <div class="produtos-lista">
-          <h3>Lista de Produtos</h3>
-          <div class="search-box">
-            <input type="text" id="searchProdutos" placeholder="Buscar produtos...">
-          </div>
-          <div id="listaProdutos" class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Nome</th>
-                  <th>Preço</th>
-                  <th>Quantidade</th>
-                  <th>Categoria</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody id="tabelaProdutos">
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- Vendas -->
-      <section id="vendas" class="page">
-        <h2>Sistema de Vendas</h2>
-        
-        <div class="venda-container">
-          <div class="venda-form">
-            <h3>Nova Venda</h3>
-            <!-- NOVO: Campo para nome do cliente -->
-            <div class="form-group">
-              <label for="nomeCliente">Cliente (opcional):</label>
-              <input type="text" id="nomeCliente" placeholder="Nome do cliente">
-            </div>
-            <!-- Seleção por Categoria -->
-            <div class="categoria-selector">
-              <h4>Selecionar por Categoria</h4>
-              <div class="categorias-grid">
-                <button class="categoria-btn" onclick="mostrarProdutosPorCategoria('alimenticios')">Alimentícios</button>
-                <button class="categoria-btn" onclick="mostrarProdutosPorCategoria('bebidas')">Bebidas</button>
-                <button class="categoria-btn" onclick="mostrarProdutosPorCategoria('higiene')">Higiene</button>
-                <button class="categoria-btn" onclick="mostrarProdutosPorCategoria('limpeza')">Limpeza</button>
-                <button class="categoria-btn" onclick="mostrarProdutosPorCategoria('outros')">Outros</button>
-                <button class="categoria-btn" onclick="mostrarTodosProdutos()">Todos</button>
-              </div>
-            </div>
-            <!-- Lista de Produtos para Seleção -->
-            <div id="produtosVenda" class="produtos-venda" style="display: none;">
-              <h4>Produtos Disponíveis</h4>
-              <div id="listaProdutosVenda" class="produtos-grid">
-              </div>
-            </div>
-            <!-- Busca Manual -->
-            <div class="form-group">
-              <label for="codigoVenda">Ou digite código/nome do produto:</label>
-              <input type="text" id="codigoVenda" placeholder="Digite o código ou nome">
-              <button onclick="adicionarItem()">Adicionar</button>
-            </div>
-            
-            <div class="carrinho">
-              <h4>Itens da Venda</h4>
-              <div id="itensVenda" class="carrinho-items">
-                <p>Nenhum item adicionado</p>
-              </div>
-              
-              <div class="total-venda">
-                <h3>Total: R$ <span id="totalVenda">0,00</span></h3>
-              </div>
-              
-              <div class="venda-actions">
-                <button onclick="limparVenda()" class="btn-secondary">Limpar</button>
-                <button onclick="finalizarVenda()" class="btn-primary">Finalizar Venda</button>
-                <!-- NOVO: Botão cancelar venda -->
-                <button type="button" onclick="cancelarVenda()" class="btn-danger">Cancelar Venda</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Estoque -->
-      <section id="estoque" class="page">
-        <h2>Controle de Estoque</h2>
-        
-        <div class="estoque-alerts">
-          <h3>Alertas de Estoque</h3>
-          <div id="alertasEstoque">
-            <p>Nenhum alerta de estoque</p>
-          </div>
-        </div>
-        
-        <div class="estoque-lista">
-          <h3>Produtos em Estoque</h3>
-          <div id="listaEstoque" class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Nome</th>
-                  <th>Quantidade</th>
-                  <th>Status</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody id="tabelaEstoque">
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- Relatórios -->
-      <section id="relatorios" class="page">
-  <h2>Relatórios</h2>
-  
-  <div class="relatorio-filters">
-    <h3>Filtros</h3>
-    <div class="form-group">
-      <label for="dataInicio">Data Início:</label>
-      <input type="date" id="dataInicio">
-    </div>
-    <div class="form-group">
-      <label for="dataFim">Data Fim:</label>
-      <input type="date" id="dataFim">
-    </div>
-    <button onclick="gerarRelatorio()">Gerar Relatório</button>
-    <button onclick="exportarPDF()" class="btn-secondary">Exportar PDF</button>
-  </div>
-  
-  <div class="relatorio-resultado">
-    <h3>Resumo de Vendas</h3>
-    <div id="resumoVendas" class="relatorio-stats">
-      <div class="stat-item">
-        <span>Total de Vendas:</span>
-        <span id="relatorioTotal">R$ 0,00</span>
-      </div>
-      <div class="stat-item">
-        <span>Número de Vendas:</span>
-        <span id="relatorioQuantidade">0</span>
-      </div>
-      <div class="stat-item">
-        <span>Ticket Médio:</span>
-        <span id="relatorioTicketMedio">R$ 0,00</span>
-      </div>
-    </div>
-    
-    <div class="vendas-detalhes">
-      <h4>Detalhes das Vendas</h4>
-      <div id="vendasDetalhes" class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Hora</th>
-              <th>Cliente</th>
-              <th>Produtos</th>
-              <th>Itens</th>
-              <th>Forma de Pagamento</th>
-              <th>Total</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="corpoRelatorioVendas">
-            <tr>
-              <td colspan="8"><p>Selecione um período para visualizar as vendas</p></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</section>
-    </div>
+    <!-- Estoque -->
+    <section id="estoque" class="page">
+      <h2>Estoque</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th><th>Nome</th><th>Qtd</th><th>Status</th><th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaEstoque"></tbody>
+      </table>
+    </section>
+    <!-- Implemente aqui outras páginas como vendas e relatórios -->
   </main>
-
-  <!-- Modal de Abertura de Caixa -->
-  <div id="modalAberturaCaixa" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Abertura de Caixa</h3>
-        <span class="close" onclick="fecharModalAbertura()">&times;</span>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label for="valorInicialCaixa">Valor Inicial em Caixa:</label>
-          <input type="number" step="0.01" id="valorInicialCaixa" placeholder="0,00" required>
-        </div>
-        <div class="modal-actions">
-          <button class="btn-secondary" onclick="fecharModalAbertura()">Cancelar</button>
-          <button class="btn-primary" onclick="confirmarAberturaCaixa()">Abrir Caixa</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal de Fechamento de Caixa -->
-  <div id="modalFechamentoCaixa" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Fechamento de Caixa</h3>
-        <span class="close" onclick="fecharModalFechamento()">&times;</span>
-      </div>
-      <div class="modal-body">
-        <div class="fechamento-resumo">
-          <h4>Resumo do Dia</h4>
-          <div class="resumo-item">
-            <span>Valor Inicial:</span>
-            <span>R$ <span id="resumoValorInicial">0,00</span></span>
-          </div>
-          <div class="resumo-item">
-            <span>Total de Vendas:</span>
-            <span>R$ <span id="resumoVendas">0,00</span></span>
-          </div>
-          <div class="resumo-item">
-            <span>Vendas em Dinheiro:</span>
-            <span>R$ <span id="resumoDinheiro">0,00</span></span>
-          </div>
-          <div class="resumo-item total">
-            <span><strong>Valor Esperado em Caixa:</strong></span>
-            <span><strong>R$ <span id="valorEsperado">0,00</span></strong></span>
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label for="valorRealCaixa">Valor Real em Caixa:</label>
-          <input type="number" step="0.01" id="valorRealCaixa" placeholder="0,00" required>
-        </div>
-        
-        <div id="diferenca" class="diferenca-info" style="display: none;">
-          <h4>Diferença: R$ <span id="valorDiferenca">0,00</span></h4>
-        </div>
-        
-        <div class="modal-actions">
-          <button class="btn-secondary" onclick="fecharModalFechamento()">Cancelar</button>
-          <button class="btn-danger" onclick="confirmarFechamentoCaixa()">Fechar Caixa</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal de Formas de Pagamento -->
-  <div id="modalPagamento" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Forma de Pagamento</h3>
-        <span class="close" onclick="fecharModalPagamento()">&times;</span>
-      </div>
-      <div class="modal-body">
-        <div class="total-venda-modal">
-          <h2>Total: R$ <span id="totalVendaModal">0,00</span></h2>
-        </div>
-        
-        <div class="formas-pagamento">
-          <button class="forma-pagamento-btn" onclick="processarPagamento('dinheiro')">
-            <div class="forma-icon">💵</div>
-            <div class="forma-texto">Dinheiro</div>
-          </button>
-          
-          <button class="forma-pagamento-btn" onclick="processarPagamento('pix')">
-            <div class="forma-icon">📱</div>
-            <div class="forma-texto">PIX</div>
-          </button>
-          
-          <button class="forma-pagamento-btn" onclick="processarPagamento('debito')">
-            <div class="forma-icon">💳</div>
-            <div class="forma-texto">Cartão Débito</div>
-          </button>
-          
-          <button class="forma-pagamento-btn" onclick="processarPagamento('credito')">
-            <div class="forma-icon">💎</div>
-            <div class="forma-texto">Cartão Crédito</div>
-          </button>
-        </div>
-        
-        <div id="campoDinheiro" class="campo-pagamento" style="display: none;">
-          <div class="form-group">
-            <label for="valorRecebido">Valor Recebido:</label>
-            <input type="number" step="0.01" id="valorRecebido" placeholder="0,00">
-          </div>
-          <div id="troco" class="troco-info" style="display: none;">
-            <h4>Troco: R$ <span id="valorTroco">0,00</span></h4>
-          </div>
-        </div>
-        
-        <div class="modal-actions">
-          <button class="btn-secondary" onclick="fecharModalPagamento()">Cancelar</button>
-          <button id="btnConfirmarPagamento" class="btn-primary" onclick="confirmarPagamento()" style="display: none;">Confirmar Pagamento</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
 </body>
-
 </html>
