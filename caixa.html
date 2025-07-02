@@ -1,0 +1,368 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Caixa - Mercadinho</title>
+  <link href="style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <header class="header">
+    <div class="container">
+      <h1>Sistema de Caixa - Mercadinho</h1>
+      <nav class="nav">
+        <button class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
+        <button class="nav-btn" onclick="showPage('produtos')">Produtos</button>
+        <button class="nav-btn" onclick="showPage('vendas')">Vendas</button>
+        <button class="nav-btn" onclick="showPage('estoque')">Estoque</button>
+        <button class="nav-btn" onclick="showPage('relatorios')">Relatórios</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="container">
+      <!-- Dashboard -->
+      <section id="dashboard" class="page active">
+        <h2>Dashboard</h2>
+        
+        <!-- Status do Caixa -->
+        <div class="caixa-status">
+          <div class="status-card">
+            <h3>Status do Caixa</h3>
+            <div id="statusCaixa" class="status-info">
+              <span class="status-badge status-fechado">Fechado</span>
+            </div>
+            <div class="caixa-actions">
+              <button id="btnAbrirCaixa" onclick="abrirCaixa()" class="btn-primary">Abrir Caixa</button>
+              <button id="btnFecharCaixa" onclick="fecharCaixa()" class="btn-danger" style="display: none;">Fechar Caixa</button>
+            </div>
+            <div id="infoCaixa" class="caixa-info" style="display: none;">
+              <p>Valor inicial: R$ <span id="valorInicial">0,00</span></p>
+              <p>Abertura: <span id="horarioAbertura">-</span></p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stats-grid"></div>
+          <div class="stat-card">
+            <h3>Vendas Hoje</h3>
+            <span class="stat-value" id="vendasHoje">R$ 0,00</span>
+          </div>
+          <div class="stat-card">
+            <h3>Produtos</h3>
+            <span class="stat-value" id="totalProdutos">0</span>
+          </div>
+          <div class="stat-card">
+            <h3>Estoque Baixo</h3>
+            <span class="stat-value" id="estoqueBaixo">0</span>
+          </div>
+          <div class="stat-card">
+            <h3>Vendas do Mês</h3>
+            <span class="stat-value" id="vendasMes">R$ 0,00</span>
+          </div>
+        </div>
+        
+        <div class="recent-sales">
+          <h3>Últimas Vendas</h3>
+          <div id="ultimasVendas" class="sales-list">
+            <p>Nenhuma venda registrada</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Produtos -->
+      <section id="produtos" class="page">
+        <h2>Gerenciar Produtos</h2>
+        
+        <div class="form-container">
+          <h3>Cadastrar Produto</h3>
+          <form id="formProduto" class="form">
+            <div class="form-group">
+              <label for="codigoProduto">Código:</label>
+              <input type="text" id="codigoProduto" required>
+            </div>
+            <div class="form-group">
+              <label for="nomeProduto">Nome:</label>
+              <input type="text" id="nomeProduto" required>
+            </div>
+            <div class="form-group">
+              <label for="precoProduto">Preço:</label>
+              <input type="number" step="0.01" id="precoProduto" required>
+            </div>
+            <div class="form-group">
+              <label for="quantidadeProduto">Quantidade:</label>
+              <input type="number" id="quantidadeProduto" required>
+            </div>
+            <div class="form-group">
+              <label for="categoriaProduto">Categoria:</label>
+              <select id="categoriaProduto" required>
+                <option value="">Selecione...</option>
+                <option value="alimenticios">Alimentícios</option>
+                <option value="bebidas">Bebidas</option>
+                <option value="higiene">Higiene</option>
+                <option value="limpeza">Limpeza</option>
+                <option value="outros">Outros</option>
+              </select>
+            </div>
+            <button type="submit">Cadastrar Produto</button>
+          </form>
+        </div>
+
+        <div class="produtos-lista">
+          <h3>Lista de Produtos</h3>
+          <div class="search-box">
+            <input type="text" id="searchProdutos" placeholder="Buscar produtos...">
+          </div>
+          <div id="listaProdutos" class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Nome</th>
+                  <th>Preço</th>
+                  <th>Quantidade</th>
+                  <th>Categoria</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaProdutos">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vendas -->
+      <section id="vendas" class="page">
+        <h2>Sistema de Vendas</h2>
+        
+        <div class="venda-container">
+          <div class="venda-form">
+            <h3>Nova Venda</h3>
+            <div class="form-group">
+              <label for="codigoVenda">Código do Produto:</label>
+              <input type="text" id="codigoVenda" placeholder="Digite o código ou nome">
+              <button onclick="adicionarItem()">Adicionar</button>
+            </div>
+            
+            <div class="carrinho">
+              <h4>Itens da Venda</h4>
+              <div id="itensVenda" class="carrinho-items">
+                <p>Nenhum item adicionado</p>
+              </div>
+              
+              <div class="total-venda">
+                <h3>Total: R$ <span id="totalVenda">0,00</span></h3>
+              </div>
+              
+              <div class="venda-actions">
+                <button onclick="limparVenda()" class="btn-secondary">Limpar</button>
+                <button onclick="finalizarVenda()" class="btn-primary">Finalizar Venda</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Estoque -->
+      <section id="estoque" class="page">
+        <h2>Controle de Estoque</h2>
+        
+        <div class="estoque-alerts">
+          <h3>Alertas de Estoque</h3>
+          <div id="alertasEstoque">
+            <p>Nenhum alerta de estoque</p>
+          </div>
+        </div>
+        
+        <div class="estoque-lista">
+          <h3>Produtos em Estoque</h3>
+          <div id="listaEstoque" class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Nome</th>
+                  <th>Quantidade</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaEstoque">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Relatórios -->
+      <section id="relatorios" class="page">
+        <h2>Relatórios</h2>
+        
+        <div class="relatorio-filters">
+          <h3>Filtros</h3>
+          <div class="form-group">
+            <label for="dataInicio">Data Início:</label>
+            <input type="date" id="dataInicio">
+          </div>
+          <div class="form-group">
+            <label for="dataFim">Data Fim:</label>
+            <input type="date" id="dataFim">
+          </div>
+          <button onclick="gerarRelatorio()">Gerar Relatório</button>
+          <button onclick="exportarPDF()" class="btn-secondary">Exportar PDF</button>
+        </div>
+        
+        <div class="relatorio-resultado">
+          <h3>Resumo de Vendas</h3>
+          <div id="resumoVendas" class="relatorio-stats">
+            <div class="stat-item">
+              <span>Total de Vendas:</span>
+              <span id="relatorioTotal">R$ 0,00</span>
+            </div>
+            <div class="stat-item">
+              <span>Número de Vendas:</span>
+              <span id="relatorioQuantidade">0</span>
+            </div>
+            <div class="stat-item">
+              <span>Ticket Médio:</span>
+              <span id="relatorioTicketMedio">R$ 0,00</span>
+            </div>
+          </div>
+          
+          <div class="vendas-detalhes">
+            <h4>Detalhes das Vendas</h4>
+            <div id="vendasDetalhes" class="table-container">
+              <p>Selecione um período para visualizar as vendas</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Modal de Abertura de Caixa -->
+  <div id="modalAberturaCaixa" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Abertura de Caixa</h3>
+        <span class="close" onclick="fecharModalAbertura()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="valorInicialCaixa">Valor Inicial em Caixa:</label>
+          <input type="number" step="0.01" id="valorInicialCaixa" placeholder="0,00" required>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="fecharModalAbertura()">Cancelar</button>
+          <button class="btn-primary" onclick="confirmarAberturaCaixa()">Abrir Caixa</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Fechamento de Caixa -->
+  <div id="modalFechamentoCaixa" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Fechamento de Caixa</h3>
+        <span class="close" onclick="fecharModalFechamento()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div class="fechamento-resumo">
+          <h4>Resumo do Dia</h4>
+          <div class="resumo-item">
+            <span>Valor Inicial:</span>
+            <span>R$ <span id="resumoValorInicial">0,00</span></span>
+          </div>
+          <div class="resumo-item">
+            <span>Total de Vendas:</span>
+            <span>R$ <span id="resumoVendas">0,00</span></span>
+          </div>
+          <div class="resumo-item">
+            <span>Vendas em Dinheiro:</span>
+            <span>R$ <span id="resumoDinheiro">0,00</span></span>
+          </div>
+          <div class="resumo-item total">
+            <span><strong>Valor Esperado em Caixa:</strong></span>
+            <span><strong>R$ <span id="valorEsperado">0,00</span></strong></span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="valorRealCaixa">Valor Real em Caixa:</label>
+          <input type="number" step="0.01" id="valorRealCaixa" placeholder="0,00" required>
+        </div>
+        
+        <div id="diferenca" class="diferenca-info" style="display: none;">
+          <h4>Diferença: R$ <span id="valorDiferenca">0,00</span></h4>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="fecharModalFechamento()">Cancelar</button>
+          <button class="btn-danger" onclick="confirmarFechamentoCaixa()">Fechar Caixa</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Formas de Pagamento -->
+  <div id="modalPagamento" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Forma de Pagamento</h3>
+        <span class="close" onclick="fecharModalPagamento()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div class="total-venda-modal">
+          <h2>Total: R$ <span id="totalVendaModal">0,00</span></h2>
+        </div>
+        
+        <div class="formas-pagamento">
+          <button class="forma-pagamento-btn" onclick="processarPagamento('dinheiro')">
+            <div class="forma-icon">💵</div>
+            <div class="forma-texto">Dinheiro</div>
+          </button>
+          
+          <button class="forma-pagamento-btn" onclick="processarPagamento('pix')">
+            <div class="forma-icon">📱</div>
+            <div class="forma-texto">PIX</div>
+          </button>
+          
+          <button class="forma-pagamento-btn" onclick="processarPagamento('debito')">
+            <div class="forma-icon">💳</div>
+            <div class="forma-texto">Cartão Débito</div>
+          </button>
+          
+          <button class="forma-pagamento-btn" onclick="processarPagamento('credito')">
+            <div class="forma-icon">💎</div>
+            <div class="forma-texto">Cartão Crédito</div>
+          </button>
+        </div>
+        
+        <div id="campoDinheiro" class="campo-pagamento" style="display: none;">
+          <div class="form-group">
+            <label for="valorRecebido">Valor Recebido:</label>
+            <input type="number" step="0.01" id="valorRecebido" placeholder="0,00">
+          </div>
+          <div id="troco" class="troco-info" style="display: none;">
+            <h4>Troco: R$ <span id="valorTroco">0,00</span></h4>
+          </div>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="fecharModalPagamento()">Cancelar</button>
+          <button id="btnConfirmarPagamento" class="btn-primary" onclick="confirmarPagamento()" style="display: none;">Confirmar Pagamento</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
