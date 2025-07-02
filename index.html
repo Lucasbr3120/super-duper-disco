@@ -4,24 +4,19 @@
   <meta charset="UTF-8">
   <title>Komilão - Sistema de Vendas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Firebase SDKs -->
+  <!-- Firebase SDKs (compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script>
-    // Substitua pelos seus dados do Firebase
-    const firebaseConfig = {
-      apiKey: "SUA_API_KEY",
-      authDomain: "SEU_AUTH_DOMAIN",
-      projectId: "SEU_PROJECT_ID",
-      // ...outros campos se necessários...
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    // Aguarde informações para preencher o firebaseConfig
+    // const firebaseConfig = { ... };
+    // firebase.initializeApp(firebaseConfig);
+    // const auth = firebase.auth();
+    // const db = firebase.firestore();
   </script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #f8f8f8; }
+    body { font-family: Arial, sans-serif; margin: 0; background: #f4f4f4; }
     header { background: #4CAF50; color: #fff; padding: 10px 0; text-align: center; }
     nav { display: flex; justify-content: center; gap: 10px; }
     .nav-btn { background: #388e3c; color: #fff; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
@@ -33,15 +28,12 @@
     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     th { background: #4CAF50; color: #fff; }
     .btn-danger { background: #e53935; color: #fff; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
-    /* Login styles */
     #telaLogin { max-width: 350px; margin: 60px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0002; padding: 30px; text-align: center;}
     #telaLogin input { margin: 10px 0; width: 90%; padding: 10px;}
     #telaLogin button { width: 40%; margin: 10px 5%; padding: 10px;}
     #erroLogin { color: red; margin: 10px 0;}
-    /* Form styles */
     form input, form select, form button { margin: 5px 5px 5px 0; padding: 7px;}
     form button { padding: 8px 16px; }
-    /* Misc */
     @media (max-width: 700px) {
       main { padding: 10px; }
       table th, table td { font-size: 14px; }
@@ -66,7 +58,6 @@
       <button class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
       <button class="nav-btn" onclick="showPage('produtos')">Produtos</button>
       <button class="nav-btn" onclick="showPage('estoque')">Estoque</button>
-      <!-- Adicione outros menus conforme desejar -->
     </nav>
   </header>
 
@@ -116,7 +107,6 @@
         <tbody id="tabelaEstoque"></tbody>
       </table>
     </section>
-    <!-- Implemente aqui outras páginas como vendas e relatórios -->
   </main>
 </body>
 </html>
