@@ -6,20 +6,52 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema de Caixa - Komilão</title>
   <link href="style.css" rel="stylesheet" type="text/css" />
+  <!-- Adicione os scripts do Firebase antes do script.js -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script>
+    // Seu firebaseConfig
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwqJO7H4TSqeyPfZdlBRhqHPK6LuiKbxs",
+      authDomain: "comilao-67a50.firebaseapp.com",
+      projectId: "comilao-67a50",
+      storageBucket: "comilao-67a50.appspot.com",
+      messagingSenderId: "533101126404",
+      appId: "1:533101126404:web:b3a48a8d8cd2236b9b2651",
+      measurementId: "G-4CBJ0EJX7B"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
 </head>
 
 <body>
   <div id="telaLogin" style="display:block;">
-  <div class="login-card">
-    <h2>Login Komilão</h2>
-    <input id="loginUsuario" placeholder="E-mail" type="email" />
-    <input id="loginSenha" placeholder="Senha" type="password" />
-    <button onclick="fazerLoginFirebase()">Entrar</button>
-    <button onclick="fazerCadastroUsuario()">Criar Conta</button>
-    <p id="erroLogin" style="color:red;display:none;"></p>
-  </div>
+    <div class="login-card">
+      <h2>Login Komilão</h2>
+      <input id="loginUsuario" placeholder="E-mail" type="email" />
+      <input id="loginSenha" placeholder="Senha" type="password" />
+      <button onclick="fazerLoginFirebase()">Entrar</button>
+      <button onclick="fazerCadastroUsuario()">Criar Conta</button>
+      <p id="erroLogin" style="color:red;display:none;"></p>
+    </div>
   </div>
   <header class="header">
+    <div class="container">
+      <h1>Sistema de Caixa - Komilão</h1>
+      <nav class="nav">
+        <button class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
+        <button class="nav-btn" onclick="showPage('produtos')">Produtos</button>
+        <button class="nav-btn" onclick="showPage('vendas')">Vendas</button>
+        <button class="nav-btn" onclick="showPage('estoque')">Estoque</button>
+        <button class="nav-btn" onclick="showPage('relatorios')">Relatórios</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
     <div class="container">
       <h1>Sistema de Caixa - Komilão</h1>
       <nav class="nav">
