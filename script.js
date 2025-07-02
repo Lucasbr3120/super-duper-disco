@@ -1,3 +1,39 @@
+function fazerLoginFirebase() {
+  const email = document.getElementById('loginUsuario').value;
+  const senha = document.getElementById('loginSenha').value;
+  auth.signInWithEmailAndPassword(email, senha)
+    .then(() => {
+      document.getElementById('telaLogin').style.display = 'none';
+      document.querySelector('header').style.display = '';
+      document.querySelector('main').style.display = '';
+      carregarDadosUsuario(); // função que você vai criar para buscar dados no Firestore
+    })
+    .catch(e => {
+      document.getElementById('erroLogin').style.display = 'block';
+      document.getElementById('erroLogin').innerText = 'Login inválido: ' + e.message;
+    });
+}
+
+function fazerCadastroUsuario() {
+  const email = document.getElementById('loginUsuario').value;
+  const senha = document.getElementById('loginSenha').value;
+  auth.createUserWithEmailAndPassword(email, senha)
+    .then(() => {
+      document.getElementById('erroLogin').style.display = 'block';
+      document.getElementById('erroLogin').innerText = 'Usuário cadastrado! Agora faça o login.';
+    })
+    .catch(e => {
+      document.getElementById('erroLogin').style.display = 'block';
+      document.getElementById('erroLogin').innerText = 'Erro ao cadastrar: ' + e.message;
+    });
+}
+
+// Oculta tudo antes do login
+window.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelector('header').style.display = 'none';
+  document.querySelector('main').style.display = 'none';
+});
+
 // Sistema de Gerenciamento de Caixa - Komilão
 
 let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
